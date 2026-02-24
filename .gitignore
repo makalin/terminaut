@@ -1,0 +1,28 @@
+# Rust
+/target/
+**/*.rs.bk
+
+# Swift / Xcode
+.build/
+DerivedData/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcworkspace/contents.xcworkspacedata
+*.xcuserstate
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# macOS
+.DS_Store
+*.swp
+*~
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# App state (optional: remove if you want to track)
+# ~/Library/Application Support/Terminaut/

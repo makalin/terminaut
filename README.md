@@ -82,39 +82,59 @@ Rust Core (term-core)
 
 ---
 
-## Repo Layout (planned)
+## Repo Layout
 
 ```
-
 terminaut/
-apps/
-macos/
-Terminaut/                 # SwiftUI app
-Terminaut.xcodeproj
-crates/
-term-core/                   # Rust core library
-term-adapters/               # Terminal/iTerm/Ghostty adapters
-term-index/                  # Folder index + fuzzy search
-assets/
-icon/
-docs/
-scripts/
-LICENSE
-README.md
-
+├── Cargo.toml                 # Rust workspace manifest
+├── crates/
+│   ├── term-core/             # Rust core library + FFI/JSON surface
+│   └── term-core-cli/         # CLI bridge consumed by the SwiftUI shell
+└── apps/
+    └── macos/
+        └── Terminaut/        # SwiftUI app (Swift Package)
+            ├── Package.swift
+            └── Sources/     # AppState, views, services
 ```
 
 ---
 
-## Build (coming soon)
+## Quick Start (local build)
 
-Terminaut is in early development. Build instructions will land once the first native shell is committed.
+Prereqs:
+- macOS 13+
+- Rust toolchain (`rustup` + stable target)
+- Xcode command line tools (for SwiftUI + `swift run`)
 
-Planned:
-- Rust stable
-- Xcode / Swift toolchain
-- `cargo build -p term-core`
-- Xcode build for `apps/macos`
+Steps:
+1. **Build the Rust core + CLI bridge**
+   ```bash
+   cargo build -p term-core-cli
+   ```
+   This produces `target/debug/term-core-cli` which stores favorites/recents in `~/Library/Application Support/Terminaut/state.json`.
+
+2. **(Optional) expose the CLI location** – the Swift app will auto-discover `../../target/{debug,release}/term-core-cli` relative to its working directory. If you relocate it, point to it manually:
+   ```bash
+   export TERMINAUT_CORE_BIN=/absolute/path/to/term-core-cli
+   ```
+
+3. **Run the SwiftUI shell**
+   ```bash
+   cd apps/macos/Terminaut
+   swift run TerminautApp
+   ```
+   The window should launch with your home folder loaded. Favorites, recents, and detected project roots flow through the Rust core via the CLI.
+
+4. **Launch terminals** – pick Terminal/iTerm2/Ghostty in the control panel, choose how many windows to spawn, and click *Open Terminal Here*. AppleScript bridges create the requested windows/tabs and sync recents back into the Rust store.
+
+### Verifying the core library without the UI
+
+```
+cargo run -p term-core-cli -- list ~
+cargo run -p term-core-cli -- favorites add ~/Projects
+cargo run -p term-core-cli -- recents list | jq
+```
+These commands return JSON payloads that match what the SwiftUI app expects.
 
 ---
 
